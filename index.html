@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso de Vue Js</title>
+</head>
+<style>
+    .animate {
+        animation: show .3s ease-in both;
+    }
+
+    @keyframes show {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0px);
+        }
+    }
+</style>
+<body>
+
+    <div id="app">
+        <h1>{{ title }}</h1>
+
+        <ul v-if="show" class="animate">
+            <series-list></series-list>
+        </ul>
+
+        <tasks></tasks>
+        
+        <button v-on:click="show = !show">Mostrar Listado de series</button>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script>
+        // LISTADO DE TAREAS
+        Vue.component("tasks", {
+            template: `
+                <div>
+                    <task-add @new="AddNewTask"></task-add>
+                    <ul>
+                        <task-detail 
+                        v-for="(task, index) in tasks_list" :key="index" 
+                        :title="task.title"
+                        :completed="task.completed"
+                        >
+                        </task-detail> 
+                    </ul>
+                </div>
+            `,
+            data() {
+                return {
+                    tasks_list: [
+                        { title: 'Read a book', completed: false},
+                        { title: 'Create a website', completed: false},
+                        { title: 'Create a portfolio', completed: true},
+                        { title: 'Learn Node JS', completed: true},
+                    ]
+                }
+            }, 
+            methods: {
+                AddNewTask (newTask) {
+                    newT = {
+                        title: newTask.name,
+                        completed: false,
+                    }
+                    
+                    this.tasks_list.push(newT)
+                }
+            }
+        });
+
+        Vue.component("task-detail", {
+            props: {
+                title: String,
+                completed: Boolean
+            },
+            template: `
+                <li>
+                    {{title}} - <span v-if="completed">Completado</span> <span v-else>Pendiente</span>
+                </li>
+            `
+        });
+
+        Vue.component("task-add", {
+            template: `
+                <form @submit.prevent="AddTask">
+                    <input type="text" placeholder="Ingresa una tarea" v-model="taskName">
+                    <input type="submit" value="Añadir">
+                </form>
+            `,
+            data () {
+                return {
+                    taskName: ''
+                }
+            },
+            methods: {
+                AddTask () {
+                    this.$emit("new", {name: this.taskName})
+                    this.taskName = ''
+                }
+            }
+        });
+
+        // LISTADO DE SERIES 
+        Vue.component("series-list", {
+            template: `
+                <div>
+                    <serie-online 
+                    v-for="(serie, index) in obj" :key="index" 
+                    :title="serie.name"
+                    :temps="serie.temps"
+                    :company="serie.company"
+                    >
+                    </serie-online>    
+                </div>
+            `,
+            data () {
+                return {
+                    obj: [
+                        {title: 'Vikings', temps: 7, company: 'HBO MAX'},
+                        {title: 'Ozark', temps: 4, company: 'Netflix'},
+                        {title: 'The Mandalorian', temps: 2, company: 'Disney'},
+                        {title: 'Estamos Muertos', temps: 1, company: 'Netflix'},
+                        {title: 'El Libro de Boda Fet', temps: 1, company: 'Disney'},
+                        {title: 'Banshee', temps: 4, company: 'HBO MAX'},
+                    ]
+                }
+            }
+        });
+
+        Vue.component("serie-online", { 
+            props: {
+                company: String, 
+                title: String, 
+                temps: Number, 
+            },
+            template: `
+                <li>
+                    <p>
+                        {{ company }} - Titulo: <strong>{{ title }}</strong> - Temporadas: {{ temps }} 
+                        <span v-if="temps <= 2">Nueva</span> 
+                        <span v-else>Finalizado</span> 
+                    </p>
+                </li>
+            `,
+        });
+
+        const app = new Vue({
+            el: '#app',
+            data: {
+                show: false,
+                title: 'Hello World Vue Js',
+            },
+        });
+    </script>
+</body>
+</html>
